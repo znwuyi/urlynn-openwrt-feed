@@ -1,0 +1,9 @@
+[submodule "luci/applications/luci-app-alpha-config"]
+	path = luci/applications/luci-app-alpha-config
+	url = https://github.com/animegasan/luci-app-alpha-config.git
+[submodule "luci/themes/luci-theme-argon"]
+	path = luci/themes/luci-theme-argon
+	url = https://github.com/jerrykuku/luci-theme-argon.git
+[submodule "luci/themes/luci-theme-alpha"]
+	path = luci/themes/luci-theme-alpha
+	url = https://github.com/derisamedia/luci-theme-alpha.git
