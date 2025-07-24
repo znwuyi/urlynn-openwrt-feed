@@ -1,0 +1,48 @@
+name: Update Submodules
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # 每天 UTC 0:00 (北京时间 8:00)
+  workflow_dispatch:     # 允许手动触发
+  push:
+    branches:
+      - master
+
+jobs:
+  update-submodules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Update specific submodules
+        run: |
+          # 更新 luci-theme-alpha 子模块
+          git submodule update --remote --merge luci/themes/luci-theme-alpha
+          
+          # 更新 luci-theme-argon 子模块
+          git submodule update --remote --merge luci/themes/luci-theme-argon
+          
+          # 添加其他需要更新的子模块...
+          git submodule update --remote --merge luci/applications/luci-app-alpha-config
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.changes == 'true'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Auto-update submodules"
+          git push
