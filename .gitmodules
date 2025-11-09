@@ -7,4 +7,3 @@
 [submodule "luci/themes/luci-theme-alpha"]
 	path = luci/themes/luci-theme-alpha
 	url = https://github.com/derisamedia/luci-theme-alpha.git
-	branch = alpha-4.0.1-beta
