@@ -5,41 +5,64 @@ on:
     - cron: '0 8 * * *'  # 每天 UTC 0:00 (北京时间 8:00)
   workflow_dispatch:     # 允许手动触发
   push:
-    branches: [ master, main ]
+    branches:
+      - master
 
 jobs:
   update-submodules:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository and submodules
+      - name: Checkout with submodules
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-          token: ${{ secrets.GH_TOKEN }}  # 关键修正
+          token: ${{ secrets.GH_TOKEN }}
 
-      - name: Update specific submodules
+      - name: Update specific submodules with unrelated history handling
         run: |
-          git submodule update --remote --merge luci/themes/luci-theme-alpha
-          git submodule update --remote --merge luci/themes/luci-theme-argon
-          git submodule update --remote --merge luci/applications/luci-app-alpha-config
+          # 进入每个子模块目录并允许无关历史合并
+          cd luci/themes/luci-theme-alpha
+          git pull origin master --allow-unrelated-histories || true
+          cd ../../..
+          
+          cd luci/themes/luci-theme-argon
+          git pull origin master --allow-unrelated-histories || true
+          cd ../../..
+          
+          cd luci/applications/luci-app-alpha-config
+          git pull origin master --allow-unrelated-histories || true
+          cd ../../..
+          
+          # 更新主项目的子模块引用
+          git submodule update --init --recursive
 
-      - name: Debug - Check submodule status
-        run: git submodule status
+      - name: Force update submodule references
+        run: |
+          # 强制更新子模块到远程最新状态
+          git submodule foreach 'git fetch --all && git reset --hard origin/master || git reset --hard origin/main'
 
       - name: Check for changes
         id: changes
         run: |
-          if [[ -n $(git status --porcelain) ]]; then
+          # 检查是否有需要提交的变更
+          if [[ -n $(git status --porcelain) ]] || git submodule status | grep -q '^+'; then
             echo "changes=true" >> $GITHUB_OUTPUT
+            echo "检测到变更，准备提交"
           else
             echo "changes=false" >> $GITHUB_OUTPUT
+            echo "没有检测到变更"
           fi
 
       - name: Commit and push changes
         if: steps.changes.outputs.changes == 'true'
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git add .
-          git commit -m "chore: Auto-update submodules"
+          git commit -m "Auto-update submodules $(date +'%Y-%m-%d %H:%M:%S')"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Print completion message
+        run: echo "子模块更新流程完成"
