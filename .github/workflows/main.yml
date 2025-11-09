@@ -63,7 +63,6 @@ jobs:
           # 使用正确的远程URL格式进行推送
           git push https://${{ secrets.GH_TOKEN }}@github.com/znwuyi/urlynn-openwrt-feed.git HEAD:master
         env:
-          # 确保使用正确的令牌名称
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Print completion message
         run: echo "子模块更新流程完成"
