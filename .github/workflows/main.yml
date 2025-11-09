@@ -56,13 +56,14 @@ jobs:
       - name: Commit and push changes
         if: steps.changes.outputs.changes == 'true'
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Auto-update submodules $(date +'%Y-%m-%d %H:%M:%S')"
-          git push
+          # 使用正确的远程URL格式进行推送
+          git push https://${{ secrets.GH_TOKEN }}@github.com/znwuyi/urlynn-openwrt-feed.git HEAD:master
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
+          # 确保使用正确的令牌名称
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Print completion message
         run: echo "子模块更新流程完成"
