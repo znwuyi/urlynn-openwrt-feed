@@ -7,6 +7,3 @@
 [submodule "luci/themes/luci-theme-alpha"]
 	path = luci/themes/luci-theme-alpha
 	url = https://github.com/derisamedia/luci-theme-alpha.git
-[submodule "luci/applications/luci-app-natmapt"]
-	path = luci/applications/luci-app-natmapt
-	url = https://github.com/muink/luci-app-natmapt.git
